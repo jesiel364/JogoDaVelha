@@ -1,5 +1,10 @@
 <template>
   <div class="container">
+
+    <audio ref="click" :src="click_sound"></audio>
+    <audio ref="success" :src="success_sound"></audio>
+    <audio ref="music" :src="music_sound"></audio>
+
     <strong v-if="empate">EMPATE</strong>
     <div class="tabuleiro_card">
       <div @click="jogada(pos)" v-for="(pos, key) in celulas" class="celula">
@@ -23,6 +28,12 @@
 
     <div class="desc">
       <div>
+        
+
+
+
+        <strong v-text='meuTexto'></strong>
+
         <p v-for="item in jogadas">
           <span v-if="item.player == 'x'"
             ><strong>Jogador X:</strong> {{ item.pos }}</span
@@ -34,7 +45,37 @@
 
           <!--<span><strong>pos:</strong> {{ item.pos }}</span>-->
         </p>
+
+
+
       </div>
+                      <v-btn
+          v-if='!muted'
+          @click='console.log(muted=true)'
+          class="bg-white mt-2"
+          theme="dark"
+          size="x-small"
+          icon="mdi-volume-high"
+        ></v-btn>        
+
+        <v-btn
+          v-else
+          @click='console.log(muted=false)'
+          class="bg-white mt-2"
+          theme="dark"
+          size="x-small"
+          icon="mdi-volume-off"
+        ></v-btn>
+
+        
+        <v-btn
+          
+          @click="reiniciar()"
+          class="bg-white mt-2"
+          theme="dark"
+          size="x-small"
+          icon="mdi-restart"
+        ></v-btn>
 
       <div>
         <p>
@@ -42,7 +83,7 @@
           ><br />
           <span><strong>Pos.:</strong> {{ ultimaJogada.pos }}</span>
         </p>
-        <v-btn @click="reiniciar()">Reiniciar</v-btn>
+        <!-- <v-btn class='mt-2' @click="reiniciar()">Reiniciar</v-btn> -->
       </div>
     </div>
   </div>
@@ -60,7 +101,9 @@
   border-radius: 8px;
   align-content: center;
   margin: 0 auto;
-  
+  margin-top: 10px;
+  margin-bottom: 10px;
+
 }
 
 .celula {
@@ -102,6 +145,11 @@ export default {
       ultimaJogada: [],
       total: "",
       empate: false,
+      click_sound: './src/assets/sounds/click.mp3',
+      success_sound: './src/assets/sounds/success.mp3',
+      music_sound: './src/assets/sounds/music.mp3',
+      muted: false,
+      meuTexto: ''
     };
   },
 
@@ -329,8 +377,10 @@ export default {
       for (let index in matchs) {
         if (matchs[index].length === 3) {
           if (matchs[index][0][1] === "x") {
+            this.success()
             alert("Vitória do X");
           } else {
+            this.success()
             alert("Vitória do O");
           }
         }
@@ -364,14 +414,16 @@ export default {
     },
 
     jogada(pos) {
-      
+      this.music()
       if (this.ultimaJogada.player == "x") {
         
         if (pos.on == false) {
+          this.playAudio()
           pos.on = true;
           pos.player = "o";
           this.jogadas.push(pos);
           this.ultimaJogada = pos;
+          
           this.verificar()
           // alert(`cond1 ${pos.player}, ${pos.pos}`)
         } else {
@@ -380,10 +432,12 @@ export default {
       } else {
         
         if (pos.on == false) {
+          this.playAudio()
           pos.on = true;
           pos.player = "x";
           this.jogadas.push(pos);
           this.ultimaJogada = pos;
+
           this.verificar()
           //alert(`cond2 ${pos.player}, ${pos.pos}`)
         } else {
@@ -394,16 +448,42 @@ export default {
     },
     
     reiniciar() {
-      isso
-      alert(this.celulas)
       
-      // celulas = this.celulas
-      // for(let chave in celulas){
-      //   alert(this.celulas[chave].on)
-      //   this.celulas[chave].player = ''
-      // }
+      console.log(this.celulas)
+      for(let chave in this.celulas){
+        this.celulas[chave].on = false
+      }
+      this.jogadas = []
+      this.ultimaJogada = []
+      
+    
     },
+
+    playAudio() {
+       this.$refs.click.play(); // Iniciando a reprodução do áudio
+    },
+
+    success() {
+       this.$refs.success.play(); // Iniciando a reprodução do áudio
+       this.$refs.success.volume = 0.1
+    },
+
+    music() {
+       this.$refs.music.play()
+       this.$refs.music.volume = 0.2
+       this.$refs.music.loop = true
+       
+
+    }
     
   },
+
+  computed: {
+    property () {
+      this.$refs.music.play()
+      this.$refs.music.muted = this.muted
+      this.meuTexto = 'sdf'
+    }
+  }
 };
 </script>
