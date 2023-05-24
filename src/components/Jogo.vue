@@ -34,24 +34,14 @@
 
         <strong v-text='meuTexto'></strong>
 
-        <p v-for="item in jogadas">
-          <span v-if="item.player == 'x'"
-            ><strong>Jogador X:</strong> {{ item.pos }}</span
-          >
-
-          <span v-else="item.player == 'o'"
-            ><strong>Jogador O:</strong> {{ item.pos }}</span
-          >
-
-          <!--<span><strong>pos:</strong> {{ item.pos }}</span>-->
-        </p>
-
-
-
+      <span><strong>Player X: {{vitorias_x.length}}</strong> </span>
+        <br>
+        <span><strong>Player O: {{vitorias_o.length}}</strong> </span>
+        
       </div>
                       <v-btn
-          v-if='!muted'
-          @click='console.log(muted=true)'
+          v-if="!muted"
+          @click='pararMusica()'
           class="bg-white mt-2"
           theme="dark"
           size="x-small"
@@ -60,7 +50,7 @@
 
         <v-btn
           v-else
-          @click='console.log(muted=false)'
+          @click='music()'
           class="bg-white mt-2"
           theme="dark"
           size="x-small"
@@ -83,7 +73,9 @@
           ><br />
           <span><strong>Pos.:</strong> {{ ultimaJogada.pos }}</span>
         </p>
-        <!-- <v-btn class='mt-2' @click="reiniciar()">Reiniciar</v-btn> -->
+        
+        
+
       </div>
     </div>
   </div>
@@ -143,12 +135,14 @@ export default {
       ],
       jogadas: [],
       ultimaJogada: [],
+      vitorias_x: [],
+      vitorias_o: [],
       total: "",
       empate: false,
       click_sound: './src/assets/sounds/click.mp3',
       success_sound: './src/assets/sounds/success.mp3',
       music_sound: './src/assets/sounds/music.mp3',
-      muted: false,
+      muted: true,
       meuTexto: ''
     };
   },
@@ -177,7 +171,7 @@ export default {
       let diag_2o = [];
 
       for (let chave in jogadas) {
-        if (jogadas[chave].player === "x") {
+        if (jogadas[chave].player == "x") {
           // linha 1
           if (
             jogadas[chave].pos === 1 ||
@@ -265,7 +259,7 @@ export default {
             let player = jogadas[chave].player;
             diag_2x.push([pos, player]);
           }
-        } else {
+        } if (jogadas[chave].player == "o") {
           // linha 1
           if (
             jogadas[chave].pos === 1 ||
@@ -301,9 +295,9 @@ export default {
 
           // coluna 1
           if (
-            jogadas[chave].pos === 1 ||
-            jogadas[chave].pos === 4 ||
-            jogadas[chave].pos === 7
+            jogadas[chave].pos == 1 ||
+            jogadas[chave].pos == 4 ||
+            jogadas[chave].pos == 7
           ) {
             let pos = jogadas[chave].pos;
             let player = jogadas[chave].player;
@@ -368,6 +362,9 @@ export default {
         row_1o,
         row_2o,
         row_3o,
+        col_1o,
+        col_2o,
+        col_3o,
         diag_1o,
         diag_2o,
       ];
@@ -375,11 +372,13 @@ export default {
       let trio = [];
 
       for (let index in matchs) {
-        if (matchs[index].length === 3) {
-          if (matchs[index][0][1] === "x") {
+        if (matchs[index].length == 3) {
+          if (matchs[index][0][1] == "x") {
+            this.vitorias_x.push("X")
             this.success()
             alert("Vitória do X");
-          } else {
+          } else if (matchs[index][0][1] == "o") {
+            this.vitorias_o.push("o")
             this.success()
             alert("Vitória do O");
           }
@@ -393,7 +392,7 @@ export default {
       
       let yes = []
      
-      if (trio.length < 3) {
+      if (trio.length =! 3) {
         let celulas = this.celulas
         for(let chave in celulas){
           if(celulas[chave].on == true){
@@ -402,7 +401,7 @@ export default {
         }
       }
       }
-      if (yes.length == 9){
+      else if (yes.length == 9){
         
         if(trio == 0){
           alert('EMPATE')
@@ -460,7 +459,8 @@ export default {
     },
 
     playAudio() {
-       this.$refs.click.play(); // Iniciando a reprodução do áudio
+      
+      this.$refs.click.play(); // Iniciando a reprodução do áudio
     },
 
     success() {
@@ -469,21 +469,19 @@ export default {
     },
 
     music() {
+      
+        this.muted = false
        this.$refs.music.play()
        this.$refs.music.volume = 0.2
        this.$refs.music.loop = true
        
-
+    },
+    
+    pararMusica(){
+      this.$refs.music.muted = true
+      this.muted = true
     }
     
   },
-
-  computed: {
-    property () {
-      this.$refs.music.play()
-      this.$refs.music.muted = this.muted
-      this.meuTexto = 'sdf'
-    }
-  }
 };
 </script>
