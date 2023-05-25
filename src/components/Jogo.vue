@@ -1,12 +1,16 @@
 <template>
   <div class="container">
-
+    
     <audio ref="click" :src="click_sound"></audio>
     <audio ref="success" :src="success_sound"></audio>
     <audio ref="music" :src="music_sound"></audio>
-
+    
+    <strong v-if="message">{{message}}</strong>
+    
+      
     <strong v-if="empate">EMPATE</strong>
     <div class="tabuleiro_card">
+      
       <div @click="jogada(pos)" v-for="(pos, key) in celulas" class="celula">
         <v-btn
           id="pos.pos"
@@ -28,44 +32,41 @@
 
     <div class="desc">
       <div>
-        
+        <strong v-text="meuTexto"></strong>
 
-
-
-        <strong v-text='meuTexto'></strong>
-
-      <span><strong>Player X: {{vitorias_x.length}}</strong> </span>
-        <br>
-        <span><strong>Player O: {{vitorias_o.length}}</strong> </span>
-        
+        <span
+          ><strong>Player X: {{ vitorias_x.length }}</strong>
+        </span>
+        <br />
+        <span
+          ><strong>Player O: {{ vitorias_o.length }}</strong>
+        </span>
       </div>
-                      <v-btn
-          v-if="!muted"
-          @click='pararMusica()'
-          class="bg-white mt-2"
-          theme="dark"
-          size="x-small"
-          icon="mdi-volume-high"
-        ></v-btn>        
+      <v-btn
+        v-if="!muted"
+        @click="pararMusica()"
+        class="bg-white mt-2"
+        theme="dark"
+        size="x-small"
+        icon="mdi-volume-high"
+      ></v-btn>
 
-        <v-btn
-          v-else
-          @click='music()'
-          class="bg-white mt-2"
-          theme="dark"
-          size="x-small"
-          icon="mdi-volume-off"
-        ></v-btn>
+      <v-btn
+        v-else
+        @click="music()"
+        class="bg-white mt-2"
+        theme="dark"
+        size="x-small"
+        icon="mdi-volume-off"
+      ></v-btn>
 
-        
-        <v-btn
-          
-          @click="reiniciar()"
-          class="bg-white mt-2"
-          theme="dark"
-          size="x-small"
-          icon="mdi-restart"
-        ></v-btn>
+      <v-btn
+        @click="reiniciar()"
+        class="bg-white mt-2"
+        theme="dark"
+        size="x-small"
+        icon="mdi-restart"
+      ></v-btn>
 
       <div>
         <p>
@@ -73,9 +74,6 @@
           ><br />
           <span><strong>Pos.:</strong> {{ ultimaJogada.pos }}</span>
         </p>
-        
-        
-
       </div>
     </div>
   </div>
@@ -95,7 +93,6 @@
   margin: 0 auto;
   margin-top: 10px;
   margin-bottom: 10px;
-
 }
 
 .celula {
@@ -112,6 +109,16 @@
   width: auto;
   justify-content: space-between;
   /*background-color: blue;*/
+}
+
+.div_teste{
+width:200px;
+height:100px;
+background-color: #151515;
+color: white;
+position:absolute;
+left: 50%;
+margin-left: -50px;
 }
 </style>
 
@@ -139,17 +146,22 @@ export default {
       vitorias_o: [],
       total: "",
       empate: false,
-      click_sound: './src/assets/sounds/click.mp3',
-      success_sound: './src/assets/sounds/success.mp3',
-      music_sound: './src/assets/sounds/music.mp3',
+      click_sound: "./src/assets/sounds/click.mp3",
+      success_sound: "./src/assets/sounds/success.mp3",
+      music_sound: "./src/assets/sounds/music.mp3",
       muted: true,
-      meuTexto: ''
+      message: "",
+      vitoria_x_pop: false,
+      vitoria_o_pop: false,
     };
+  },
+  
+  mounted() {
+    this.music()
   },
 
   methods: {
     verificar() {
-      
       const jogadas = this.jogadas;
       const ultimaJogada = this.ultimaJogada;
 
@@ -259,7 +271,8 @@ export default {
             let player = jogadas[chave].player;
             diag_2x.push([pos, player]);
           }
-        } if (jogadas[chave].player == "o") {
+        }
+        if (jogadas[chave].player == "o") {
           // linha 1
           if (
             jogadas[chave].pos === 1 ||
@@ -374,114 +387,118 @@ export default {
       for (let index in matchs) {
         if (matchs[index].length == 3) {
           if (matchs[index][0][1] == "x") {
-            this.vitorias_x.push("X")
-            this.success()
-            alert("Vitória do X");
+            this.vitorias_x.push("X");
+            this.success();
+            // alert("Vitória do X");
+            this.vitoria_x_pop = true
+            this.vitoria_o_pop = false
+            this.message = "VITÓRIA DO X"
+            setTimeout(this.music(), 2000)
           } else if (matchs[index][0][1] == "o") {
-            this.vitorias_o.push("o")
-            this.success()
-            alert("Vitória do O");
+            this.vitorias_o.push("o");
+            this.success();
+            this.vitoria_o_pop = true
+            this.vitoria_x_pop = false
+            this.message = "VITÓRIA DO O"
           }
         }
 
         if (matchs[index].length == 3) {
           trio.push(matchs[index]);
-          
         }
       }
-      
-      let yes = []
-     
-      if (trio.length =! 3) {
-        let celulas = this.celulas
-        for(let chave in celulas){
-          if(celulas[chave].on == true){
-            yes.push(celulas[chave])
-            
+
+      let yes = [];
+
+      if ((trio.length = !3)) {
+        let celulas = this.celulas;
+        for (let chave in celulas) {
+          if (celulas[chave].on == true) {
+            yes.push(celulas[chave]);
+          }
+        }
+      } else if (yes.length == 9) {
+        if (trio < 3) {
+          this.message = "EMPATE"
+          this.empate = true;
         }
       }
-      }
-      else if (yes.length == 9){
-        
-        if(trio == 0){
-          alert('EMPATE')
-          this.empate = true
-        }
-        
-      }
-      
     },
 
     jogada(pos) {
-      this.music()
-      if (this.ultimaJogada.player == "x") {
+      
+      if (this.vitoria_x_pop == false && this.vitoria_o_pop == false){
         
+      if (this.ultimaJogada.player == "x") {
         if (pos.on == false) {
-          this.playAudio()
+          this.message = ""
+          this.playAudio();
           pos.on = true;
           pos.player = "o";
           this.jogadas.push(pos);
           this.ultimaJogada = pos;
-          
-          this.verificar()
+
+          this.verificar();
           // alert(`cond1 ${pos.player}, ${pos.pos}`)
         } else {
-          alert("A célula já foi marcada");
+          this.message = "A célula já foi marcada"
+          // alert("A célula já foi marcada");
         }
       } else {
-        
         if (pos.on == false) {
-          this.playAudio()
+          this.message = ""
+          this.playAudio();
           pos.on = true;
           pos.player = "x";
           this.jogadas.push(pos);
           this.ultimaJogada = pos;
 
-          this.verificar()
+          this.verificar();
           //alert(`cond2 ${pos.player}, ${pos.pos}`)
         } else {
-          alert("A célula já foi marcada");
+          this.message = "A célula já foi marcada"
         }
-      }
+      } 
       
+      }else{
+        this.reiniciar()
+      }
     },
-    
+
     reiniciar() {
-      
-      console.log(this.celulas)
-      for(let chave in this.celulas){
-        this.celulas[chave].on = false
+      console.log(this.celulas);
+      for (let chave in this.celulas) {
+        this.celulas[chave].on = false;
       }
-      this.jogadas = []
-      this.ultimaJogada = []
-      
-    
+      this.jogadas = [];
+      this.ultimaJogada = [];
+      this.vitoria_x_pop = false
+      this.vitoria_o_pop = false
+      this.message = ''
     },
 
     playAudio() {
-      
       this.$refs.click.play(); // Iniciando a reprodução do áudio
     },
 
     success() {
-       this.$refs.success.play(); // Iniciando a reprodução do áudio
-       this.$refs.success.volume = 0.1
+      this.pararMusica();
+      this.$refs.success.play(); // Iniciando a reprodução do áudio
+      this.$refs.success.volume = 0.1;
     },
 
     music() {
-      
-        this.muted = false
-       this.$refs.music.play()
-       this.$refs.music.volume = 0.2
-       this.$refs.music.loop = true
-       
+      this.muted = false;
+      this.$refs.music.muted = false;
+      this.$refs.music.play();
+      this.$refs.music.volume = 0.2;
+      this.$refs.music.loop = true;
     },
-    
-    pararMusica(){
-      this.$refs.music.muted = true
-      this.muted = true
-    }
-    
+
+    pararMusica() {
+      this.$refs.music.muted = true;
+      this.muted = true;
+    },
   },
 };
 </script>
